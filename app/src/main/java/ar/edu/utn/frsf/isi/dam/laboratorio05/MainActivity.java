@@ -3,10 +3,13 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
 
 // AGREGAR en MapaFragment una interface MapaFragment.OnMapaListener con el método coordenadasSeleccionadas
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                         boolean fragmentTransaction = false;
                         Fragment fragment = null;
                         String tag = "";
+
                         switch (menuItem.getItemId()) {
                             case R.id.optNuevoReclamo:
                                 tag = "nuevoReclamoFragment";
@@ -49,27 +53,27 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
                                 fragmentTransaction = true;
                                 break;
+
                             case R.id.optListaReclamo:
                                 tag="listaReclamos";
                                 fragment =  getSupportFragmentManager().findFragmentByTag(tag);
                                 if(fragment==null) fragment = new ListaReclamosFragment();
                                 fragmentTransaction = true;
                                 break;
-                            case R.id.optVerMapa:
 
+                            case R.id.optVerMapa:
                                 tag="mapaReclamos";
                                 fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-
-                                if(fragment == null){
-                                    MapaFragment mapaFragment = new MapaFragment();
+                                if (fragment == null){
+                                    fragment = new MapaFragment();
                                     Bundle bundle = new Bundle();
-                                    bundle.putInt("tipo_mapa",1);
-                                    mapaFragment.setArguments(bundle);
-
+                                    bundle.putInt("tipo_mapa", 1);
+                                    fragment.setArguments(bundle);
                                 }
+                                ((MapaFragment)fragment).setListener(MainActivity.this);
                                 fragmentTransaction = true;
-                                System.out.println("Mapa abierto.");
                                 break;
+
                             case R.id.optHeatMap:
                                 //HABILITAR
                                 //tag="mapaReclamos";
