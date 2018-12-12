@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     Bundle bundle = new Bundle();
                                     bundle.putInt("tipo_mapa", 5);
                                     fragment.setArguments(bundle);
-                                    (creo que conviene hacer esto cuando implementemos en el main la busquedaPorTipos, y cedamos el control a MapaFragment)
+                                    (creo que conviene hacer esto cuando implementemos en el main el crear mapa por tipo reclamo, y cedemos el control a MapaFragment)
                                     */
                                 }
                                 ((FormularioBusquedaFragment)fragment).setListener(MainActivity.this);
