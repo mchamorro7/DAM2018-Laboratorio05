@@ -3,6 +3,7 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -29,6 +32,8 @@ import java.util.List;
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -37,7 +42,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private OnAbrirMapaListener listener;
     private List<Reclamo> listaReclamos = new ArrayList<Reclamo>();
     private ArrayList<Marker> marcadores = new ArrayList<Marker>();
-    private int binary; //Variable que determina si se debe mostrar los marcadores o si solo se muestra el mapa para obtener coordenadas
+    private int binary; //Variable que determina si se debe mostrar los marcadores o si solo se muestra el mapa para obtener
+    private int switcheada;
     public MapaFragment() { }
 
 
@@ -46,16 +52,26 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
         int tipoMapa =0;
         binary=0;
+        switcheada=0;
         Bundle argumentos = getArguments();
         if(argumentos !=null) {
             tipoMapa = argumentos .getInt("tipo_mapa",0);
         }
         getMapAsync(this);
 
-        if(tipoMapa==2){
-            getReclamos();
-            binary=1;
+        switch (tipoMapa){
+            case 2:
+                getReclamos();
+                binary=1;
+                switcheada=2;
+                break;
+            case 3:
+                getReclamos();
+                binary=1;
+                switcheada=3;
+                break;
         }
+
         return rootView;
     }
     @Override
@@ -64,16 +80,42 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         //Solicitamos el permiso de ubicación ni bien entramos a la sección "Ver en mapa".
         updateMap();
         if(binary==1){
-            //Por cada reclamo añadimos el marcador
-            for (Reclamo r: listaReclamos
-                    ) {
-                addMarcador(r);
-            }
+            if(listaReclamos!=null) {
+                switch (switcheada) {
+                    case 2:
+                        //Por cada reclamo añadimos el marcador
+                        for (Reclamo r : listaReclamos
+                                ) {
+                            addMarcador(r);
+                        }
 
-            LatLngBounds bounds = extremos();
-            int padding = 50; //Relleno
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-            miMapa.animateCamera(cu);
+                        LatLngBounds bounds = extremos();
+                        int padding = 50; //Relleno
+                        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                        miMapa.animateCamera(cu);
+                        break;
+                    case 3:
+                        Bundle args = this.getArguments();
+                        long aux = args.getInt("id_reclamo");
+                        Reclamo temp = new Reclamo();
+                        for (Reclamo r : listaReclamos
+                                ) {
+                            if(r.getId()==aux){
+                                temp=r;
+                            }
+                        }
+                        this.addMarcador(temp);
+
+                        CircleOptions circleOptions = new CircleOptions()
+                                .center(new LatLng(temp.getLatitud(),temp.getLongitud()))
+                                .radius(500)
+                                .strokeColor(Color.RED)
+                                .fillColor(0x220000FF)
+                                .strokeWidth(5);
+                        Circle circle = miMapa.addCircle(circleOptions);
+                        break;
+                }
+            }
         }else{
             //IMPLEMENTACIÓN SETONMAPLONGCLICKLISTENER
             miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
