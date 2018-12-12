@@ -234,6 +234,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         Thread hilo = new Thread(runn);
         hilo.start();
     }
+    
 
     public void addMarcador(Reclamo reclamo){
         LatLng latitudLongitud = new LatLng(reclamo.getLatitud(), reclamo.getLongitud());
