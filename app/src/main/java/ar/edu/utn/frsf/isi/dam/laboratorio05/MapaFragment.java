@@ -25,6 +25,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +74,11 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 binary=1;
                 switcheada=3;
                 break;
+            case 4:
+                getReclamos();
+                binary=1;
+                switcheada=4;
+                break;
         }
 
         return rootView;
@@ -113,6 +122,17 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                                 .fillColor(0x220000FF)
                                 .strokeWidth(5);
                         Circle circle = miMapa.addCircle(circleOptions);
+                        break;
+                    case 4:
+
+                        List<LatLng> list = new ArrayList<>();
+                        for(Reclamo r: listaReclamos){
+                            list.add(new LatLng(r.getLatitud(), r.getLongitud()));
+                        }
+                            HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(list)
+                                .build();
+                        TileOverlay mOverlay = miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+
                         break;
                 }
             }
