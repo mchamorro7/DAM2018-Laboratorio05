@@ -25,6 +25,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
@@ -48,6 +50,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private ArrayList<Marker> marcadores = new ArrayList<Marker>();
     private int binary; //Variable que determina si se debe mostrar los marcadores o si solo se muestra el mapa para obtener
     private int switcheada;
+    private int tipo_reclamo = -1;
     public MapaFragment() { }
 
 
@@ -69,15 +72,23 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 binary=1;
                 switcheada=2;
                 break;
+
             case 3:
                 getReclamos();
                 binary=1;
                 switcheada=3;
                 break;
+
             case 4:
                 getReclamos();
                 binary=1;
                 switcheada=4;
+                break;
+
+            case 5:
+                getReclamos();
+                binary=1;
+                switcheada=5;
                 break;
         }
 
@@ -97,12 +108,12 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                                 ) {
                             addMarcador(r);
                         }
-
                         LatLngBounds bounds = extremos();
                         int padding = 50; //Relleno
                         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
                         miMapa.animateCamera(cu);
                         break;
+
                     case 3:
                         Bundle args = this.getArguments();
                         long aux = args.getInt("id_reclamo");
@@ -114,7 +125,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                             }
                         }
                         this.addMarcador(temp);
-
                         CircleOptions circleOptions = new CircleOptions()
                                 .center(new LatLng(temp.getLatitud(),temp.getLongitud()))
                                 .radius(500)
@@ -123,8 +133,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                                 .strokeWidth(5);
                         Circle circle = miMapa.addCircle(circleOptions);
                         break;
-                    case 4:
 
+                    case 4:
                         List<LatLng> list = new ArrayList<>();
                         for(Reclamo r: listaReclamos){
                             list.add(new LatLng(r.getLatitud(), r.getLongitud()));
@@ -132,7 +142,40 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                             HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(list)
                                 .build();
                         TileOverlay mOverlay = miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+                        break;
 
+                    case 5:
+                        Bundle arguments = this.getArguments();
+                        int tipoReclamo = arguments.getInt("tipo_reclamo");
+                        String tipo;
+                        if (tipoReclamo==0)
+                            tipo = "VEREDAS";
+                        else if (tipoReclamo==1)
+                            tipo = "SEMAFOROS";
+                        else if (tipoReclamo==2)
+                            tipo = "ILUMINACION";
+                        else if (tipoReclamo==3)
+                            tipo = "CALLE_EN_MAL_ESTADO";
+                        else if (tipoReclamo==4)
+                            tipo = "RESIDUOS";
+                        else if (tipoReclamo==5)
+                            tipo = "RUIDOS_MOLESTOS";
+                        else
+                            tipo = "OTRO";
+
+                        List<LatLng> listaParaPolilinea = new ArrayList<LatLng>();
+                        for (Reclamo r: listaReclamos) {
+                            if (r.getTipo().toString().equals(tipo)) {
+                                this.addMarcador(r);
+                                listaParaPolilinea.add(new LatLng(r.getLatitud(), r.getLongitud()));
+                            }
+                        }
+
+                        PolylineOptions polilineaOpt = new PolylineOptions();
+                        for(LatLng ll: listaParaPolilinea) {
+                            polilineaOpt.add(ll).color(Color.RED);
+                        }
+                        Polyline polilinea = miMapa.addPolyline(polilineaOpt);
                         break;
                 }
             }
@@ -156,6 +199,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         LatLngBounds bounds = builder.build();
         return bounds;
     }
+
     private void updateMap(){
         if (ActivityCompat.checkSelfPermission(getContext(),Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {

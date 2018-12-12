@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     fragment = new NuevoReclamoFragment();
                                     ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
                                 }
-
                                 fragmentTransaction = true;
                                 break;
 
@@ -88,6 +87,22 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 }
                                 ((MapaFragment)fragment).setListener(MainActivity.this);
 
+                                fragmentTransaction = true;
+                                break;
+
+                            case R.id.optFormularioBusqueda:
+                                tag="formularioBusquedaReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if (fragment == null){
+                                    fragment = new FormularioBusquedaFragment();
+                                    /*
+                                    Bundle bundle = new Bundle();
+                                    bundle.putInt("tipo_mapa", 5);
+                                    fragment.setArguments(bundle);
+                                    (creo que conviene hacer esto cuando implementemos en el main la busquedaPorTipos, y cedamos el control a MapaFragment)
+                                    */
+                                }
+                                ((FormularioBusquedaFragment)fragment).setListener(MainActivity.this);
                                 fragmentTransaction = true;
                                 break;
                         }
@@ -137,24 +152,23 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
     // pasando como argumento el objeto "LatLng" elegido por el usuario en el click largo
     // como ubicación del reclamo
 
-        @Override
-        public void coordenadasSeleccionadas(LatLng c) {
-            String tag = "nuevoReclamoFragment";
-            Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-            if(fragment==null) {
-                fragment = new NuevoReclamoFragment();
-                ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
-            }
-            Bundle bundle = new Bundle();
-            bundle.putString("latLng",c.latitude+";"+c.longitude);
-            fragment.setArguments(bundle);
-                                                           //CEDEMOS EL CONTROL A NUEVORECLAMOFRAGMENT
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.contenido, fragment,tag)
-                    .commit();
-
+    @Override
+    public void coordenadasSeleccionadas(LatLng c) {
+        String tag = "nuevoReclamoFragment";
+        Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+        if(fragment==null) {
+            fragment = new NuevoReclamoFragment();
+            ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
         }
+        Bundle bundle = new Bundle();
+        bundle.putString("latLng",c.latitude+";"+c.longitude);
+        fragment.setArguments(bundle);
+                    //CEDEMOS EL CONTROL A NUEVORECLAMOFRAGMENT
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.contenido, fragment,tag)
+                .commit();
+    }
 
     @Override
     public void obtenerCoordenadas() {
@@ -179,5 +193,24 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         // para que el usuario vea el mapa y con el click largo pueda acceder
         // a seleccionar la coordenada donde se registra el reclamo
         // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
+    }
+
+    public void crearMapaPorTipoReclamo(int posReclamoSpinner){
+        String tag="mapaReclamos";
+        Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+        if (fragment == null){
+            fragment = new MapaFragment();
+            Bundle bundle = new Bundle();
+            bundle.putInt("tipo_mapa", 5);
+            bundle.putInt("tipo_reclamo", posReclamoSpinner);;
+            fragment.setArguments(bundle);
+        }
+        ((MapaFragment)fragment).setListener(MainActivity.this);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.contenido, fragment,tag)
+                .addToBackStack(tag)
+                .commit();
+        getSupportActionBar().setTitle("Formulario Busqueda");
     }
 }

@@ -22,6 +22,7 @@ public class NuevoReclamoFragment extends Fragment {
 
     public interface OnNuevoLugarListener {
         public void obtenerCoordenadas();
+        public void crearMapaPorTipoReclamo(int posReclamoSpinner);
     }
 
     public void setListener(OnNuevoLugarListener listener) {
@@ -121,11 +122,11 @@ public class NuevoReclamoFragment extends Fragment {
             Thread t1 = new Thread(hiloCargaDatos);
             t1.start();
         }else{
-            String coordenadas = "0;0";
-            if(getArguments()!=null) coordenadas = getArguments().getString("latLng","0;0");
-            tvCoord.setText(coordenadas);
-            reclamoActual = new Reclamo();
-        }
+        String coordenadas = "0;0";
+        if(getArguments()!=null) coordenadas = getArguments().getString("latLng","0;0");
+        tvCoord.setText(coordenadas);
+        reclamoActual = new Reclamo();
+    }
 
     }
 
