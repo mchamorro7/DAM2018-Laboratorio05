@@ -1,5 +1,6 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
+import android.content.pm.PackageManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 break;
                         }
 
+
                         if(fragmentTransaction) {
                             getSupportFragmentManager()
                                     .beginTransaction()
@@ -213,4 +215,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                 .commit();
         getSupportActionBar().setTitle("Formulario Busqueda");
     }
+
+
+
 }

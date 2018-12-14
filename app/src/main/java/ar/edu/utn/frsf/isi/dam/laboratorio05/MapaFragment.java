@@ -100,7 +100,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         //Solicitamos el permiso de ubicación ni bien entramos a la sección "Ver en mapa".
         updateMap();
         if(binary==1){
-            if(listaReclamos!=null) {
                 switch (switcheada) {
                     case 2:
                         //Por cada reclamo añadimos el marcador
@@ -108,10 +107,12 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                                 ) {
                             addMarcador(r);
                         }
-                        LatLngBounds bounds = extremos();
-                        int padding = 50; //Relleno
-                        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                        miMapa.animateCamera(cu);
+                        if(listaReclamos.size()!=0) {
+                            LatLngBounds bounds = extremos();
+                            int padding = 50; //Relleno
+                            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                            miMapa.animateCamera(cu);
+                        }
                         break;
 
                     case 3:
@@ -136,12 +137,15 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
                     case 4:
                         List<LatLng> list = new ArrayList<>();
-                        for(Reclamo r: listaReclamos){
-                            list.add(new LatLng(r.getLatitud(), r.getLongitud()));
-                        }
+                        if(listaReclamos.size()!=0){
+                            System.out.println("Entro a la wea");
+                            for (Reclamo r : listaReclamos) {
+                                list.add(new LatLng(r.getLatitud(), r.getLongitud()));
+                            }
                             HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(list)
-                                .build();
-                        TileOverlay mOverlay = miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+                                    .build();
+                            TileOverlay mOverlay = miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+                        }
                         break;
 
                     case 5:
@@ -178,7 +182,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                         Polyline polilinea = miMapa.addPolyline(polilineaOpt);
                         break;
                 }
-            }
+
         }else{
             //IMPLEMENTACIÓN SETONMAPLONGCLICKLISTENER
             miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -192,11 +196,17 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
     private LatLngBounds extremos (){
         //Calculamos latitud-longitud extremos
+        int contador=0;
+        LatLngBounds bounds = new LatLngBounds( new com.google.android.gms.maps.model.LatLng (0,0),new com.google.android.gms.maps.model.LatLng (0,0));
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
         for (Marker marker : marcadores) {
             builder.include(marker.getPosition());
+            contador++;
         }
-        LatLngBounds bounds = builder.build();
+        if(contador>0){
+            bounds = builder.build();
+        }
         return bounds;
     }
 

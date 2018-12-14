@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -48,6 +49,20 @@
         android:id="@+id/reclamo_tipo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></Spinner>
+
+    <ImageView
+        android:id="@+id/foteli"
+        android:layout_width="500px"
+        android:layout_height="500px"
+        android:rotation="270"
+        android:src="@android:color/darker_gray" />
+
+    <Button
+        android:id="@+id/btnTomarFoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TOMAR FOTO" />
+
     <Button
         android:id="@+id/btnGuardar"
         android:text="Guardar"
