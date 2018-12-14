@@ -68,4 +68,27 @@
         android:text="Guardar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/btnGrabarAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GRABAR" />
+
+        <Button
+            android:id="@+id/btnPararAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PARAR" />
+
+        <Button
+            android:id="@+id/btnReproducirAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REPRODUCIR" />
+    </LinearLayout>
+
 </LinearLayout>
