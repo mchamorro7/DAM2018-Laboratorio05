@@ -80,9 +80,8 @@ public class NuevoReclamoFragment extends Fragment {
     private static final String LOG_TAG = "AudioRecordTest";
     private MediaRecorder mRecorder = null;
     private MediaPlayer mPlayer = null;
-    private String mFileName;
-    private Boolean grabando = false;
     private Boolean reproduciendo = false;
+    private String audioAnterior = null;
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     public NuevoReclamoFragment() {
@@ -129,9 +128,11 @@ public class NuevoReclamoFragment extends Fragment {
         mail.setEnabled(edicionActivada );*/
         tipoReclamo.setEnabled(edicionActivada);
         btnGuardar.setEnabled(edicionActivada);
+        btnGrabarAudio.setEnabled(edicionActivada);
         btnTomarFoto.setEnabled(edicionActivada);
-        btnPararAudio.setEnabled(false);
         btnReproducirAudio.setEnabled(false);
+        btnPararAudio.setEnabled(false);
+
 
         buscarCoord.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,7 +146,7 @@ public class NuevoReclamoFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 saveOrUpdateReclamo();
-
+                btnReproducirAudio.setEnabled(false);
             }
         });
 
@@ -289,7 +290,6 @@ public class NuevoReclamoFragment extends Fragment {
         btnPararAudio.setEnabled(true);
         btnGrabarAudio.setEnabled(false);
         btnReproducirAudio.setEnabled(false);
-        btnGuardar.setEnabled(false);
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -306,6 +306,7 @@ public class NuevoReclamoFragment extends Fragment {
             Log.e(LOG_TAG, "prepare() failed");
         }
         mRecorder.start();
+        System.out.println("Se comienza a grabar.");
 
     }
 
@@ -315,26 +316,47 @@ public class NuevoReclamoFragment extends Fragment {
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
-        btnGuardar.setEnabled(true);
+        btnGrabarAudio.setEnabled(true);
+        btnPararAudio.setEnabled(false);
+        btnReproducirAudio.setEnabled(true);
+        System.out.println("Se para de grabar.");
     }
 
     //METODO REPRODUCIR AUDIO
 
     private void reproducirAudio(){
         mPlayer = new MediaPlayer();
-        try {
-            mPlayer.setDataSource(reclamoActual.getPathAudio());
-            mPlayer.prepare();
-            mPlayer.start();
-            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    mPlayer.release();
-                    mPlayer = null;
-                }
-            });
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
+        btnPararAudio.setEnabled(false);
+        btnGrabarAudio.setEnabled(false);
+        btnReproducirAudio.setEnabled(true);
+        buscarCoord.setEnabled(false);
+        if(reproduciendo){
+            mPlayer.release();
+            mPlayer = null;
+            buscarCoord.setEnabled(true);
+            btnGrabarAudio.setEnabled(true);
+            reproduciendo=false;
+        }else{
+            try {
+                System.out.println("Se comienza a reproducir.");
+                reproduciendo=true;
+                mPlayer.setDataSource(reclamoActual.getPathAudio());
+                mPlayer.prepare();
+                mPlayer.start();
+                mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        mPlayer.release();
+                        mPlayer = null;
+                        buscarCoord.setEnabled(true);
+                        btnGrabarAudio.setEnabled(true);
+                        System.out.println("Se termina de reproducir.");
+                    }
+                });
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "prepare() failed");
+            }
+
         }
 
     }
@@ -349,11 +371,15 @@ public class NuevoReclamoFragment extends Fragment {
                         @Override
                         public void run() {
                             //Obtenemos la foto que habiamos guardado.
+                            btnPararAudio.setEnabled(false);
                             if(reclamoActual.getPathFoto()!=null){
                                 onActivityResult(REQUEST_IMAGE_SAVE, Activity.RESULT_OK, null);
                             }
+                            if(reclamoActual.getPathAudio()!=null){
+                                btnReproducirAudio.setEnabled(true);
+                            }
                             fotoAnterior = reclamoActual.getPathFoto();
-
+                            audioAnterior = reclamoActual.getPathAudio();
                             mail.setText(reclamoActual.getEmail());
                             tvCoord.setText(reclamoActual.getLatitud()+";"+reclamoActual.getLongitud());
                             reclamoDesc.setText(reclamoActual.getReclamo());
@@ -391,7 +417,9 @@ public class NuevoReclamoFragment extends Fragment {
             reclamoActual.setLongitud(Double.valueOf(coordenadas[1]));
         }
         btnGrabarAudio.setEnabled(true);
-        btnReproducirAudio.setEnabled(false);
+        if(reclamoActual.getPathAudio()!=null){
+            btnReproducirAudio.setEnabled(true);
+        }
         btnPararAudio.setEnabled(false);
         Runnable hiloActualizacion = new Runnable() {
             @Override
@@ -402,14 +430,20 @@ public class NuevoReclamoFragment extends Fragment {
                     f.delete();
                     System.out.println("Se borro la foto anterior.");
                 }
-
-                if(reclamoActual.getId()>0){
+                if(audioAnterior!=reclamoActual.getPathAudio() && audioAnterior!=null){
                     System.out.println("2");
+                    File f = new File(audioAnterior);
+                    f.delete();
+                    System.out.println("Se borro el audio anterior.");
+                }
+                if(reclamoActual.getId()>0){
+                    System.out.println("3");
                     reclamoDao.update(reclamoActual);
                 }
                 else{
-                    System.out.println("3");
+                    System.out.println("4");
                     reclamoDao.insert(reclamoActual);
+
                 }
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -418,7 +452,9 @@ public class NuevoReclamoFragment extends Fragment {
                         mail.setText(R.string.texto_vacio);
                         tvCoord.setText(R.string.texto_vacio);
                         reclamoDesc.setText(R.string.texto_vacio);
+
                         foteli.setImageResource(android.R.color.darker_gray);
+
                         getActivity().getFragmentManager().popBackStack();
                     }
                 });
