@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -145,9 +146,18 @@ public class NuevoReclamoFragment extends Fragment {
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveOrUpdateReclamo();
-                btnReproducirAudio.setEnabled(false);
+                if(tipoReclamo.getSelectedItemPosition()!=0 && tipoReclamo.getSelectedItemPosition()!=3){
+                    if(reclamoDesc.getText().toString().length()>=8 || !(reclamoActual.getPathAudio()==null)){
+                        saveOrUpdateReclamo();
+                    } else {
+                       //Mensaje de error - Se debe añadir un audio o descripcion
+                        System.out.println("SE DEBE AÑADIR UN AUDIO/DESCRIPCION");
+                    }
+                }
+
+
             }
+                //btnReproducirAudio.setEnabled(false);
         });
 
         //BOTON GRABAR AUDIO
@@ -193,11 +203,29 @@ public class NuevoReclamoFragment extends Fragment {
                         sacarGuardarFoto();
                     }
                 }
-
+                btnGuardar.setEnabled(true);
                 /*Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                 }*/
+            }
+        });
+
+        tipoReclamo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position == 0 || position == 3){
+                    if(reclamoActual.getPathFoto() == null){
+                        btnGuardar.setEnabled(false);
+                    }else{
+                        btnGuardar.setEnabled(true);
+                    }
+                } else btnGuardar.setEnabled(true);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                //EMPTY
             }
         });
         return v;
